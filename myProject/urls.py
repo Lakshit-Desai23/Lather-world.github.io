@@ -34,13 +34,14 @@ urlpatterns = [
     path('forgot_password/',views.forgot_password,name='forgot_password'),
     path('change_password/<token>/',views.change_password,name='change_password'),
     path('directly_change_password/',views.directly_change_pass,name='directly_change_password'),
-    # Product related urls
     path('user_profile/',views.user_profile,name='user_profile'),
-    # path('item_category_list/',views.CategoryListView.as_view(),name='item_category_list'),
-    path('item_category_list/',views.CategoryListView,name='item_category_list'),
-
-
+    path('item_category_list/',views.CategoryListView.as_view(),name='item_category_list'),
     path('item_category_list/<slug:slug_text>/',views.ItemListView.as_view(),name='item'),
+    #subitems
+    path('subitems/<slug:slug_text>/',views.subitems.as_view(),name='subitems'),
+
+
+
     path('item_category_list/<slug:cat_slug>/<slug:prod_slug>/',views.ItemDetails,name='itemDetails'),
     path('add-to-cart',views.addtocart,name='add-to-cart'),
     path('cart',views.userCart,name='cart'),
@@ -48,16 +49,11 @@ urlpatterns = [
     path('delete-cart-item',views.deletecartitem,name='delete-cart-item'),
     path('change-charges',views.changecharges,name='change-charges'),
     path('checkout',views.checkout,name='checkout'),
-    path('place-order',views.placeorder,name='place-order'),
-    path('proceed-to-pay',views.razorPayProcess,name='proceed-to-pay'),
+    path('place-order',views.placeorder,name='placeorder'),
+    
+    path('proceed-to-pay',views.razorpaycheck),
     path('my-orders',views.orderpage,name='my-orders'),
     path('orderview/<str:t_no>',views.orderdetailspage,name='orderview'),
-
-    #-----------
-    path('cancelOrder1/<str:t_no>',views.cancelOrder1,name='orderview'),
-
-
-
     path('submit_review/<int:item_id>',views.reviewsubmit,name='submit_review'),
     path('offer',views.offer,name='offer'),
     path('cancelOrder',views.orderCancel,name='cancelOrder'),
@@ -80,8 +76,21 @@ urlpatterns = [
     path('allOrderAdmin/<int:idorder>/',views.allOrderAdminPanelUpdate,name='allOrderAdminUpdate'),
     path('allCancelOrderAdmin/',views.allCancelOrderAdmin,name='allCancelOrderAdmin'),
     path('allItemCategoryAdmin/',views.allItemCategoryAdminPanel,name='allItemCategoryAdmin'),
+    #allsubCategoryAdmin
+    path('allsubCategoryAdmin/',views.allsubCategoryAdminPanel,name='allsubCategoryAdmin'),
+
     path('allItemCategoryAdminUpdate/<int:id_itemCat>/',views.allItemCategoryAdminPanelUpdate,name='allItemCategoryAdminUpdate'),
+    #allsubCategoryAdminUpdate
+    path('allsubCategoryAdminUpdate/<int:id_itemCat>/',views.allsubCategoryAdminUpdate,name='allsubCategoryAdminUpdate'),
+
+
+    path('allsubCategoryAdmin/<int:id_itemCat>/delete/',views.allsubCategoryAdminPanelDelete,name='allItemCategoryAdminDelete'),
+
+
     path('allItemCategoryAdmin/<int:id_itemCat>/delete/',views.allItemCategoryAdminPanelDelete,name='allItemCategoryAdminDelete'),
+
+
+
     path('allItemAdmin/',views.allItemAdminPanel,name='allItemAdmin'),
     path('allItemAdminUpdate/<int:id_item>/',views.allItemAdminPanelUpdate,name='allItemAdminUpdate'),
     path('allItemAdmin/<int:id_item>/delete/',views.allItemAdminPanelDelete,name='allItemAdminDelete'),
@@ -98,7 +107,19 @@ urlpatterns = [
     path('addAreaAdminPanel/',views.addAreaAdminPanel,name='addAreaAdminPanel'),
     path('addAreaAdminPanelData/',views.addAreaAdminPanelData1,name='addAreaAdminPanelData'),
     path('addItemCatAdminPanel/',views.addItemCatAdminPanell,name='addItemCatAdminPanel'),
+    #subcategory
+    path('addsubCatAdminPanel/',views.addsubCatAdminPanel,name='addsubCatAdminPanel'),
+
+
+
+
     path('addItemCatAdminPanelData/',views.addItemCatAdminPanellData,name='addItemCatAdminPanelData'),
+    # subcategory
+    path('addsubCatAdminPanelData/',views.addsubCatAdminPanelData,name='addsubCatAdminPanelData'),
+
+
+
+
     path('addItemAdminPanel/',views.addItemAdminPanell,name='addItemAdminPanel'),
     path('addItemAdminPanelData/',views.addItemAdminPanellData,name='addItemAdminPanelData'),
     path('addOfferAdminPanel/',views.addOfferAdminPanell,name='addOfferAdminPanel'),
@@ -123,7 +144,6 @@ urlpatterns = [
     path('allPurchaseRawMaterialReturn/',views.allPurchaseRawMaterialReturnAdminPanel,name='allPurchaseRawMaterialReturn'),
     path('ajax/load_tables/',views.load_tables,name='ajax_load_tables'),
     path('orderInvoice/<str:t_no>/',orderInvoicePdf.as_view(),name='orderInvoice'),
-
     path('brewerReportOrder/',views.reportBrewerOrderAdmin,name='brewerReportOrder'),
     path('brewerReportOrder/orderResult/',views.orderReport,name='orderReport'),
     path('orderReportGenerate/report/',orderReportGenerateAdmin.as_view(),name='orderReportGenerate'),
@@ -139,6 +159,10 @@ urlpatterns = [
     path('brewerReportPurchaseReturn/',views.brewerPurchaseReturn,name='brewerReportPurchaseReturn'),
     path('brewerReportPurchaseReturn/orderResult/',views.purchaseReturnReportAdmin,name='purchaseReturnReport'),
     path('purchaseReturnReportGenerateAdminPanel/report/',purchaseReturnReportGenerateAdmin.as_view(),name='purchaseReturnReportGenerateAdminPanel'),
+
+
+
+
 ]
 
 handler404 = 'Brewer_Cafe_And_Restro.views.error_404_view'

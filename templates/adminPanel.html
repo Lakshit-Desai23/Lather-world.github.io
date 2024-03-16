@@ -140,6 +140,21 @@
                     </div>
                 </div>
             </li>
+            <li class="nav-item">
+                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwoItemCats"
+                    aria-expanded="true" aria-controls="collapseTwoItemCats">
+                    <i class="fas fa-list"></i>
+                    <span>Sub Category</span>
+                </a>
+                <div id="collapseTwoItemCats" class="collapse" aria-labelledby="headingTwo"
+                    data-parent="#accordionSidebar">
+                    <div class="bg-white py-2 collapse-inner rounded">
+                        <h6 class="collapse-header">Sub Category Details:</h6>
+                        <a class="collapse-item" href="{% url 'allsubCategoryAdmin' %}">All Sub  Category</a>
+                        <a class="collapse-item" href="{% url 'addsubCatAdminPanel' %}">Add Sub Category</a>
+                    </div>
+                </div>
+            </li>
 
             <li class="nav-item">
                 <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwoItem"
@@ -496,14 +511,14 @@
                         <div class="modal-dialog">
                           <div class="modal-content">
                             <div class="modal-header">
-                              <h1 class="modal-title fs-5" id="exampleModalLabel">Cafe Data</h1>
+                              <h1 class="modal-title fs-5" id="exampleModalLabel"> Data</h1>
                               <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <form action="{% url 'editCafeData' %}" method="post" enctype="multipart/form-data">
                                 {% csrf_token %}
                                 <div class="modal-body">
                                 <div class="form-group">
-                                    <label>Cafe Name</label>
+                                    <label> Name</label>
                                     {% if restrorant.restaurant_name %}
                                     <input type="text" name="cafeName" value="{{restrorant.restaurant_name}}" class="form-control" required>
                                     {% else %}
@@ -511,7 +526,7 @@
                                     {% endif %}
                                 </div>
                                 <div class="form-group">
-                                    <label>Cafe Email</label>
+                                    <label> Email</label>
                                     {% if restrorant.restaurant_email %}
                                     <input type="email" name="cafeEmail" value="{{restrorant.restaurant_email}}" class="form-control" required>
                                     {% else %}
@@ -519,7 +534,7 @@
                                     {% endif %}
                                 </div>
                                 <div class="form-group">
-                                    <label>Cafe Mobile</label>
+                                    <label> Mobile</label>
                                     
                                     <input type="number" name="cafeMobile" value="" class="form-control"required>
                                     
@@ -527,11 +542,11 @@
                                      {% endcomment %}
                                 </div>
                                 <div class="form-group">
-                                    <label>Cafe Image</label>
+                                    <label> Image</label>
                                     <input type="file" accept="image/*" name="cafeImage" class="form-control">
                                 </div>
                                 <div class="form-group">
-                                    <label>Cafe Description</label>
+                                    <label> Description</label>
                                     {% if restrorant.restaurant_description %}
                                     <input type="text" value="{{restrorant.restaurant_description}}" name="cafeDesc" class="form-control" required>
                                     {% else %}
@@ -539,7 +554,7 @@
                                     {% endif %}
                                 </div>
                                 <div class="form-group">
-                                    <label>Cafe Address</label>
+                                    <label> Address</label>
                                     {% if restrorant.restaurant_address %}
                                     <textarea name="cafeAddress" cols="30" rows="10" class="form-control" required>{{restrorant.restaurant_address}}</textarea>
                                     {% else %}

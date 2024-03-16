@@ -10,6 +10,7 @@ $(document).ready(function () {
         var city = $('#cityd :selected').text();
         var area = $('#aread :selected').text();
         var pincode = $("[name='pincode']").val();
+        var token = $("[name='csrfmiddlewaretoken']").val();
 
         if(fname == "" || lname == "" || email == "" || mobile == "" || address == "" || pincode == ""){
             swal("Error", "Please fill all details!", "error");
@@ -21,25 +22,51 @@ $(document).ready(function () {
                 success: function (response) {
                     var options = {
                         "key": "rzp_test_cvtTXHmj1tE4Hz",
-                        "amount": "50000",
+                        "amount": response.total_price * 100,
                         "currency": "INR",
-                        "name": "Professional Cipher",
-                        "description": "Test Transaction",
+                        "name": "Cafe",
+                        "description": "Thank you for buying from us",
                         "image": "https://example.com/your_logo",
-                        "order_id": "order_9A33XWu170gUtm",
-                        "handler": function (response) {
-                            alert(response.razorpay_payment_id);
-                            alert(response.razorpay_order_id);
-                            alert(response.razorpay_signature)
+                        //"order_id": "order_9A33XWu170gUtm",
+                        "handler": function (responseb) {
+                            alert(responseb.razorpay_payment_id);
+                            console.log(responseb)
+
+                            data = {
+                                "fname": fname,
+                                "lname": lname,
+                                "email" : email,
+                                "mobile": mobile,
+                                "address" : address,
+                                "city" : city,
+                                "area" : area,
+                                "pincode" : pincode,
+                                "payment_mode":"Paid by Razorpay" ,
+                                "payment_id": responseb.razorpay_payment_id,
+                                csrfmiddlewaretoken :token
+
+                            }
+                            $.ajax({
+                                method :"POST",
+                                url: '/placeorder',
+                                data:data,
+                                
+                                success:function(responsec){
+                                    swal("Congratulations!",responsec.status,"Success").then((value)=>{
+                                        window.location.href = "/my-orders"
+                                    });
+
+                                }
+                            })
+                          
+                           
                         },
                         "prefill": {
-                            "name": "Gaurav Kumar",
-                            "email": "gaurav@gmail.com",
-                            "contact": "9023964738"
+                            "name": fname+" "+lname,
+                            "email": email,
+                            "contact": mobile
                         },
-                        "notes": {
-                            "address": "Razorpay Corporate Office"
-                        },
+                       
                         "theme": {
                             "color": "#3399cc"
                         }

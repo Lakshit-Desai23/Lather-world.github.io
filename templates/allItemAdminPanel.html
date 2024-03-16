@@ -140,6 +140,21 @@
                     </div>
                 </div>
             </li>
+            <li class="nav-item">
+                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwoItemCats"
+                    aria-expanded="true" aria-controls="collapseTwoItemCats">
+                    <i class="fas fa-list"></i>
+                    <span>Sub Category</span>
+                </a>
+                <div id="collapseTwoItemCats" class="collapse" aria-labelledby="headingTwo"
+                    data-parent="#accordionSidebar">
+                    <div class="bg-white py-2 collapse-inner rounded">
+                        <h6 class="collapse-header">Sub Category Details:</h6>
+                        <a class="collapse-item" href="{% url 'allsubCategoryAdmin' %}">All Sub  Category</a>
+                        <a class="collapse-item" href="{% url 'addsubCatAdminPanel' %}">Add Sub Category</a>
+                    </div>
+                </div>
+            </li>
 
             <li class="nav-item">
                 <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwoItem"
@@ -442,7 +457,7 @@
 
                     <!-- Content Row -->
                     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-                        <h1 class="h3 mb-0 text-gray-800">Lather Item Data</h1>
+                        <h1 class="h3 mb-0 text-gray-800">Lather World Item Data</h1>
                     </div>
 
                     <div class="container-fluid">
@@ -485,7 +500,7 @@
                                                     {{item.item_price}}
                                                 </td>
                                                 <td>
-                                                    {{item.item_category_iditem_category.item_category_name}}
+                                                    {{item.item_category_iditem_category.subcategory_name}}
                                                 </td>
                                                 <td>
                                                     <a href="#itemEditForm-{{forloop.counter}}" class="btn-success" data-toggle="modal" style="padding: 5px;">Edit</a>
@@ -532,7 +547,7 @@
                                         <label>Select Category</label>
                                         <select name="Catitem" class="form-control">
                                             {% for i in allItemCategory %}
-                                            <option value="{{i.item_category_name}}">{{i.item_category_name}}</option>
+                                            <option value="{{i.subcategory_name}}">{{i.subcategory_name}}</option>
                                             {% endfor %}
                                         </select>
                                     </div>

@@ -52,7 +52,7 @@
 <!-- header section end -->
 
 <div class="container mt-5">
-<form action="{% url 'place-order' %}" method="post">
+<form action="{% url 'placeorder' %}" method="post">
     {% csrf_token %}
     <div class="row">
         <div class="col-md-7" style="margin-bottom: 10px;">
@@ -110,12 +110,21 @@
                             </select>
                         </div>
                         <div class="col-md-6 mt-4" style="margin-bottom: 20px;">
+
+
+
                             <label style="font-size: 2rem;font-weight: bolder;" for="area">Area</label><br/>
                             <select name="area1" style="font-size: 1.5rem;" class="form-control" id="aread" required>
                                 {% for a in area %}
                                 <option value="{{a.area_name}}">{{a.area_name}}</option>
                                 {% endfor %}
                             </select>
+                            {% comment %} <label style="font-size: 2rem;font-weight: bolder;" for="area">Area</label><br/>
+                            <select name="area1" style="font-size: 1.5rem;" class="form-control" id="aread" required>
+                                {% for a in area %}
+                                <option value="{{a.area_name}}">{{a.area_name}}</option>
+                                {% endfor %}
+                            </select> {% endcomment %}
                         </div>
                         <div class="col-md-6 mt-4" style="margin-bottom: 20px;">
                             <label style="font-size: 2rem;font-weight: bolder;">Pincode</label>
@@ -175,8 +184,9 @@
                     <input type="hidden" name="payment_mode" value="COD">
                     <div class="mt-3">
                         <button type="submit" class="btn btn-success w-100 mt-3" style="font-size: 1.5rem; padding: 10px 0 10px 0;">COD | Place Order</button>
-                         <button type="button" class="btn btn-primary w-100 mt-3 payWithRazorpay" style="font-size: 1.5rem; padding: 10px 0 10px 0;">Pay With Razorpay</button> 
-                        <div id="paypal-button-container"></div>
+                        <button type="button" class="btn btn-primary w-100 mt-3 payWithRazorpay" style="font-size: 1.5rem; padding: 10px 0 10px 0;">Pay With Razorpay</button>
+                        <div id="paypal-button-container">
+                            </div>
                     </div>
                     {% else %}
                     <h3>Your cart is empty</h3>
@@ -193,7 +203,7 @@
 <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script src="https://www.paypal.com/sdk/js?client-id=AWLvl7vBSez3zeBmyICfvy_BYvzF6JW2tHy1y9spjgFIoMUxbmrKENwrGjcFtm6G3iJnIdhkJDClT5G7&currency=USD"></script>
-<script>
+ <script>
     paypal.Buttons({
       // Sets up the transaction when a payment button is clicked
       style: {
@@ -265,7 +275,7 @@
           }
           $.ajax({
             method:"POST",
-            url: {% url 'place-order' %},
+            url: {% url 'placeorder' %},
             data: data,
             success: function (response) {
                 
@@ -275,7 +285,7 @@
       }
     }).render('#paypal-button-container');
   </script>
-<script>
+<script> 
 alertify.set('notifier','position', 'top-right');
 {% for msg in messages %}
 {% if msg.tags == 'success' %}

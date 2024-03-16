@@ -202,19 +202,19 @@ def validationLogin(username,password,username1,flag):
 
 def home(request):
     if 'user_name' in request.session:
-        current_user = request.session['user_name']
+        current_user = request.session['user_name'] 
         object_list = ItemCategory.objects.all()
-        param = {'current_user': current_user,'object_list':object_list}
-        return render(request, 'home.html', param)
+        param = {'current_user':current_user,"object_list":object_list}
+        return render(request,'home.html',param)
     elif 'admin' in request.session:
         current_user = request.session['admin']
         object_list = ItemCategory.objects.all()
         param = {'current_admin':current_user,"object_list":object_list}
         return render(request,'home.html',param)
-    
     object_list = ItemCategory.objects.all()
-    param = {'object_list':object_list}
-    return render(request, 'home.html', param)
+    param = {"object_list":object_list}
+    return render(request,'home.html',param)
+    
 
 def error_404_view(request,exception):
     return render(request,'404.html')
@@ -400,7 +400,7 @@ def forgot_password(request):
     else:
         if request.method == "POST":
             userEmail = request.POST.get('uEmail')
-            myUserEmail = userEmail
+            myUserEmail = None
             error_message = None
             success_message = None
             token = str(uuid.uuid4())
@@ -592,45 +592,54 @@ def user_profile(request):
 
         return render(request,'user_profile.html',data)
 
-# class CategoryListView(ListView):
-#     model = ItemCategory
-#     template_name = 'itemcategory_list.html'
-#     queryset = ItemCategory.objects.all()
+class CategoryListView(ListView):
+    model = ItemCategory
+    template_name = 'itemcategory_list.html'
+    queryset = ItemCategory.objects.all()
 
-#     def get_queryset(self):
+    def get_queryset(self):
+        q = self.request.GET.get('q')
+        if q:
+            object_list = self.model.objects.filter(Q(item_category_name__icontains=q) | Q(item_category_description__icontains=q))
+        else:
+            object_list = self.model.objects.all()
+        return object_list
+
+# class ItemListView(ListView):
+#     model = Item
+#     template_name = 'item.html'
+
+#     def get_queryset(self,*args, **kwargs):
 #         q = self.request.GET.get('q')
-#         if q:
-#             pass
-#             # object_list = self.model.objects.filter(Q(item_category_name__icontains=q) | Q(item_category_description__icontains=q))
-#         else:
-#             object_list = self.model.objects.all()
+#         getCategory = ItemCategory.objects.get(slug=self.kwargs['slug_text'])
+#         if self.kwargs.get('slug_text'):
+#             object_list = Item.objects.filter(item_category_iditem_category=getCategory.iditem_category)
+#             if q:
+#                 object_list = self.model.objects.filter((Q(item_name__icontains=q) | Q(item_description__icontains=q)),item_category_iditem_category=getCategory.iditem_category)
+#             else:
+#                 object_list = Item.objects.filter(item_category_iditem_category=getCategory.iditem_category)
+
 #         return object_list
-
-
-
-def CategoryListView(request):
-    if 'user_name' in request.session:
-        object_list = ItemCategory.objects.all()
-        context = {
-            "object_list":object_list
-
-        }
-        return render (request,"itemcategory_list.html",context)
     
-
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         context["category"] = ItemCategory.objects.get(slug=self.kwargs['slug_text'])
+#         return context
+    
+#---------------------
 class ItemListView(ListView):
-    model = Item
-    template_name = 'item.html'
+    model = Subcategory
+    template_name = 'Subcategory.html'
 
     def get_queryset(self,*args, **kwargs):
         q = self.request.GET.get('q')
         getCategory = ItemCategory.objects.get(slug=self.kwargs['slug_text'])
         if self.kwargs.get('slug_text'):
-            object_list = Item.objects.filter(item_category_iditem_category=getCategory.iditem_category)
+            object_list = Subcategory.objects.filter(item_category=getCategory.iditem_category)
             if q:
-                object_list = self.model.objects.filter((Q(item_name__icontains=q) | Q(item_description__icontains=q)),item_category_iditem_category=getCategory.iditem_category)
+                object_list = self.model.objects.filter((Q(subcategory_name__icontains=q) | Q(subcategory_description__icontains=q)),item_category=getCategory.iditem_category)
             else:
-                object_list = Item.objects.filter(item_category_iditem_category=getCategory.iditem_category)
+                object_list = Subcategory.objects.filter(item_category=getCategory.iditem_category)
 
         return object_list
     
@@ -638,6 +647,30 @@ class ItemListView(ListView):
         context = super().get_context_data(**kwargs)
         context["category"] = ItemCategory.objects.get(slug=self.kwargs['slug_text'])
         return context
+    
+#=====subitems
+class subitems(ListView):
+    model = Item
+    template_name = 'item.html'
+
+    def get_queryset(self,*args, **kwargs):
+        q = self.request.GET.get('q')
+        getCategory = Subcategory.objects.get(slug=self.kwargs['slug_text'])
+        if self.kwargs.get('slug_text'):
+            object_list = Item.objects.filter(item_category_iditem_category=getCategory.idsubcategory)
+            if q:
+                object_list = self.model.objects.filter((Q(subcategory_name__icontains=q) | Q(subcategory_description__icontains=q)),item_category=getCategory.iditem_category)
+            else:
+                object_list = Item.objects.filter(item_category_iditem_category=getCategory.idsubcategory)
+
+        return object_list
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["category"] = Subcategory.objects.get(slug=self.kwargs['slug_text'])
+        return context
+    
+    
 
 def ItemDetails(request,cat_slug,prod_slug):
     if 'user_name' in request.session:
@@ -762,15 +795,16 @@ def checkout(request):
     grand_total = 0
     total_offer_price = 0
     total_price = 0
-    
     for i in cartOfferItem:
         total_offer_price = total_offer_price + i.item_iditem.offer_price * i.item_qty
     
     for item in cartitems:
         total_price = total_price + (item.item_iditem.item_price * item.item_qty)
 
-    grand_total = (total_price) - total_offer_price  
-    context = {'cartitems':cartitems,'total_price':total_price, 'city':c1, 'area':a1,'current_user':u1,'delArea':delcharges,'offerPrice':total_offer_price,'grandTotal':grand_total}
+    grand_total = (total_price) - total_offer_price 
+    p = grand_total+delcharges 
+    p1 = p*100
+    context = {'cartitems':cartitems,'total_price':total_price, 'city':c1, 'area':a1,'current_user':u1,'delArea':delcharges,'offerPrice':total_offer_price,'grandTotal':grand_total,"p1":p1}
     return render(request,'checkout.html',context)
 
 def changecharges(request):
@@ -792,7 +826,9 @@ def placeorder(request):
         neworder.ordermobile = request.POST.get('mobile')
         neworder.order_delivery_address = request.POST.get('address')
         neworder.city = request.POST.get('city')
-        a1 = Area.objects.get(area_name=request.POST['area1'])
+        area1 = request.POST.get('area1')
+        print("area1 ======= ",area1)
+        a1 = Area.objects.get(area_name=area1)
         neworder.area_pincode = Area.objects.get(pincode=a1.pincode)
         neworder.order_payment_method = request.POST.get('payment_mode')
         neworder.payment_id = request.POST.get('payment_id')
@@ -840,64 +876,28 @@ def placeorder(request):
             messages.success(request,"Your order has been placed successfully!")
     
     return redirect('home')
-import razorpay
-razorpay_client = razorpay.Client(auth=(os.getenv("RAZORPAY_API_KEY"), os.getenv("RAZORPAY_API_SECRET")))
 
-# def razorPayProcess(request):
-#     u1 = User.objects.get(user_name=request.session['user_name'])
-#     userId = u1.iduser
-#     cart = Cart.objects.filter(user_iduser=userId)
-#     total_price = 0
-#     amount = 5000
-#     client = razorpay.Client(
-#             auth=("rzp_test_cvtTXHmj1tE4Hz", "rtx2rSPfyWnAslO00uje43sG"))
+def razorpaycheck(request):
+    u1 = User.objects.get(user_name=request.session['user_name'])
+    userId = u1.iduser
+    cart = Cart.objects.filter(user_iduser=userId)
+    total_price = 0
+    a2 = Area.objects.get(pincode=u1.pincode.pincode)
 
-#     payment = client.order.create({'amount': amount, 'currency': 'INR',
-#                                        'payment_capture': '1'})
-#     for item in cart:
-#         total_price = total_price + item.item_iditem.item_price * item.item_qty
+    for item in cart:
+        total_price = total_price + a2.area_delivery_charges + item.item_iditem.item_price * item.item_qty
     
-#     return JsonResponse({
-#         'total_price':total_price
-#     })
+    return JsonResponse({
+        'total_price':total_price
+    })
 
 
 
 
 
-def razorPayProcess(request):
-    if request.method == "POST":
-        # Retrieve user details
-        fname = request.POST.get('fname')
-        lname = request.POST.get('lname')
-        email = request.POST.get('email')
-        mobile = request.POST.get('mobile')
-        address = request.POST.get('address')
-        city = request.POST.get('city')
-        area = request.POST.get('area')
-        pincode = request.POST.get('pincode')
 
-        # Perform necessary validations
 
-        # Calculate order amount (assuming it's hardcoded for now)
-        amount = 5000  # Example amount in paisa (INR 50)
 
-        # Create order with Razorpay
-        razorpay_order = razorpay_client.order.create({
-            'amount': amount,
-            'currency': 'INR',
-            'payment_capture': '1'
-        })
-
-        # Perform additional logic such as saving order details to database, etc.
-
-        return JsonResponse({
-            'order_id': razorpay_order['id'],
-            'amount': razorpay_order['amount'],
-            'currency': razorpay_order['currency']
-        })
-
-    return JsonResponse({'error': 'Invalid request method'}, status=405)
 def orderpage(request):
     u1 = User.objects.get(user_name=request.session['user_name'])
     userId = u1.iduser
@@ -912,19 +912,6 @@ def orderdetailspage(request,t_no):
     orderitems = OrderedItem.objects.filter(order_idorder=order)
     context = {'userOrderData':order,'userOrderDetails':orderitems}
     return render(request,'userOrderDetails.html',context)
-
-
-#-------------
-def cancelOrder1(request,t_no):
-    u1 = User.objects.get(user_name=request.session['user_name'])
-    userId = u1.iduser
-    order = Order.objects.filter(tracking_no=t_no).filter(user_iduser=userId).first()
-    order.order_status = "Cancelled by Customer"
-    order.save()
-    orderitems = OrderedItem.objects.filter(order_idorder=order)
-    context = {'userOrderData':order,'userOrderDetails':orderitems}
-    return render(request,'userOrderDetails.html',context)
-
 
 def reviewsubmit(request,item_id):
     url = request.META.get('HTTP_REFERER')
@@ -1206,7 +1193,8 @@ def AddAdmin(request):
                             user_sec_answer=userSecAns,
                             is_admin=1,
                             pincode=Area.objects.get(pincode=firstArea.pincode),
-                            idrestaurant=Restaurant.objects.get(idrestaurant=1))
+                            idrestaurant=Restaurant.objects.get(idrestaurant=1)
+                            )
         
         error_message = validation(userName,userPassword,userConfirmPassword,userEmail,userMobile,user,count,myCharacter)
 
@@ -1450,6 +1438,29 @@ def allItemCategoryAdminPanel(request):
     data = {'currentAdmin':u3,'totalAdmin':totalAdmin,'totalUser':totalUser,'totalItem':totalItems,'totalOffer':totalOffer,'allItemCategory':page_obj}
     return render(request,'allItemCategoryAdminPanel.html',data)
 
+#
+#allsubCategoryAdmin
+def allsubCategoryAdminPanel(request):
+    u3 = User.objects.get(user_name=request.session['admin'])
+    totalAdmin = User.objects.filter(is_admin=1).count()
+    totalUser = User.objects.filter(is_admin=0).count()
+    totalItems = Item.objects.all().count()
+    totalOffer = Offer.objects.all().count()
+    allItemCategory = ItemCategory.objects.all()
+    allsubCategory = Subcategory.objects.all().order_by('idsubcategory')
+    paginator = Paginator(allsubCategory,7,orphans=1)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    data = {'currentAdmin':u3,'totalAdmin':totalAdmin,'totalUser':totalUser,'totalItem':totalItems,'totalOffer':totalOffer,'allsubCategory':page_obj,"allItemCategory":allItemCategory}
+    return render(request,'allsubCategory.html',data)
+
+
+
+
+
+
+
+
 
 def allItemCategoryAdminPanelUpdate(request,id_itemCat):
     url = request.META.get('HTTP_REFERER')
@@ -1476,12 +1487,51 @@ def allItemCategoryAdminPanelUpdate(request,id_itemCat):
 
     return render(request,'allItemCategoryAdminPanel.html')
 
+#allsubCategoryAdminUpdate
+def allsubCategoryAdminUpdate(request,id_itemCat):
+    url = request.META.get('HTTP_REFERER')
+    if request.method == "POST":
+        catName = request.POST.get('catName')
+        catDesc = request.POST.get('catDesc')
+
+        itemCategoryData = Subcategory.objects.get(idsubcategory=id_itemCat)
+
+        itemCategoryData.subcategory_name = catName
+        itemCategoryData.subcategory_description = catDesc
+
+        if(len(request.FILES) != 0):
+            catimage = request.FILES['catImage']
+            catImage1 = str(catimage)
+            if(not(catImage1.lower().endswith(('.png','.jpg','.jpeg')))):
+                messages.error(request,'Choose only image!')
+                return redirect(url)
+            itemCategoryData.subcategory_image = request.FILES['catImage']
+            
+        itemCategoryData.save()
+        messages.success(request,'Data updated!')
+        return redirect(url)
+
+    return render(request,'allsubCategoryAdminPanel.html')
+
+
+
+
 def allItemCategoryAdminPanelDelete(request,id_itemCat):
     url = request.META.get('HTTP_REFERER')
     itemCatDelete = ItemCategory.objects.filter(iditem_category=id_itemCat)
     itemCatDelete.delete()
     messages.success(request,"Item category deleted!")
     return redirect(url)
+
+#allsubCategoryAdminPanelDelete
+def allsubCategoryAdminPanelDelete(request,id_itemCat):
+    url = request.META.get('HTTP_REFERER')
+    itemCatDelete = Subcategory.objects.filter(idsubcategory=id_itemCat)
+    itemCatDelete.delete()
+    messages.success(request,"Item category deleted!")
+    return redirect(url)
+
+
 
 def allItemAdminPanel(request):
     u3 = User.objects.get(user_name=request.session['admin'])
@@ -1490,7 +1540,7 @@ def allItemAdminPanel(request):
     totalItems = Item.objects.all().count()
     totalOffer = Offer.objects.all().count()
     allItem = Item.objects.all().order_by('iditem')
-    allItemCategory = ItemCategory.objects.all()
+    allItemCategory = Subcategory.objects.all()
     paginator = Paginator(allItem,8,orphans=1)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -1504,14 +1554,15 @@ def allItemAdminPanelUpdate(request,id_item):
         itemPrice = request.POST.get('itemPrice')
         itemCat = request.POST.get('Catitem')
         itemDesc = request.POST.get('itemDesc')
-
+        print("id_item ===== ",id_item)
+        print("itemCat======",itemCat)
         itemData = Item.objects.get(iditem=id_item)
-        getCat = ItemCategory.objects.get(item_category_name=itemCat)
-        getCatId = getCat.iditem_category
+        getCat = Subcategory.objects.get(subcategory_name = itemCat)
+        getCatId = getCat.idsubcategory
 
         itemData.item_name = itemName
         itemData.item_price = itemPrice
-        itemData.item_category_iditem_category = ItemCategory.objects.get(iditem_category=getCatId)
+        itemData.item_category_iditem_category = Subcategory.objects.get(idsubcategory=getCatId)
         itemData.item_description = itemDesc
 
         if(len(request.FILES) != 0):
@@ -1527,6 +1578,10 @@ def allItemAdminPanelUpdate(request,id_item):
         return redirect(url)
 
     return render(request,'allItemAdminPanel.html')
+
+
+
+   
 
 def allItemAdminPanelDelete(request,id_item):
     url = request.META.get('HTTP_REFERER')
@@ -2206,6 +2261,22 @@ def addItemCatAdminPanell(request):
     data = {'currentAdmin':u3,'totalAdmin':totalAdmin,'totalUser':totalUser,'totalItem':totalItems,'totalOffer':totalOffer}
     return render(request,'addItemCategory.html',data)
 
+#subcategory
+def addsubCatAdminPanel(request):
+    u3 = User.objects.get(user_name=request.session['admin'])
+    totalAdmin = User.objects.filter(is_admin=1).count()
+    totalUser = User.objects.filter(is_admin=0).count()
+    totalItems = Item.objects.all().count()
+    totalOffer = Offer.objects.all().count()
+    allitemcategory = ItemCategory.objects.all()
+    
+    data = {'currentAdmin':u3,'totalAdmin':totalAdmin,'totalUser':totalUser,'totalItem':totalItems,'totalOffer':totalOffer,"allitemcategory":allitemcategory}
+    return render(request,'addsubCatAdminPanel.html',data)
+
+
+
+
+
 def addItemCatAdminPanellData(request):
     url = request.META.get('HTTP_REFERER')
     if request.method == "POST":
@@ -2231,7 +2302,7 @@ def addItemCatAdminPanellData(request):
                 break
         catSlug = catName + uniqueString
         catData.slug = catSlug
-        # catData.restaurant_idrestaurant = Restaurant.objects.get(idrestaurant=RestaurantData.idrestaurant)
+        catData.restaurant_idrestaurant = Restaurant.objects.get(idrestaurant=RestaurantData.idrestaurant)
 
         if(len(request.FILES) != 0):
             catImage = request.FILES['catImage']
@@ -2247,15 +2318,111 @@ def addItemCatAdminPanellData(request):
 
     return render(request,'addItemCategory.html')
 
+#subcategory
+def addsubCatAdminPanelData(request):
+    url = request.META.get('HTTP_REFERER')
+    if request.method == "POST":
+        RestaurantData = Restaurant.objects.first()
+        catName = request.POST.get('catName')
+        catDesc = request.POST.get('catDesc')
+        catItem = request.POST.get('Catitem')
+        allCatData = Subcategory.objects.all()
+
+        getCategory = ItemCategory.objects.get(item_category_name=catItem)
+
+        if(Subcategory.objects.filter(subcategory_name=catName)):
+            messages.error(request,'Category already exist!')
+            return redirect(url)
+        
+        uniqueString = str(uuid.uuid4())
+        catSlug = catName + uniqueString
+
+        catData = Subcategory()
+
+        catData.subcategory_name = catName
+        catData.subcategory_description = catDesc
+        for i in allCatData:
+            if(i.slug == catSlug):
+                uniqueString = str(uuid.uuid4())
+                break
+        catSlug = catName + uniqueString
+        catData.slug = catSlug
+
+        catData.item_category = ItemCategory.objects.get(iditem_category=getCategory.iditem_category)
+        catData.restaurant_idrestaurant = Restaurant.objects.get(idrestaurant=RestaurantData.idrestaurant)
+
+        if(len(request.FILES) != 0):
+            catImage = request.FILES['catImage']
+            catImage1 = str(catImage)
+            if(not(catImage1.lower().endswith(('.png','.jpg','.jpeg')))):
+                messages.error(request,'Choose only image!')
+                return redirect(url)
+            catData.subcategory_image = request.FILES['catImage']
+            
+        catData.save()
+        messages.success(request,'Item Category Added!')
+        return redirect(url)
+   
+    return render(request,'addsubCategory.html')
+
+
+
+
+
+
+
 def addItemAdminPanell(request):
     u3 = User.objects.get(user_name=request.session['admin'])
     totalAdmin = User.objects.filter(is_admin=1).count()
     totalUser = User.objects.filter(is_admin=0).count()
     totalItems = Item.objects.all().count()
     totalOffer = Offer.objects.all().count()
-    allItemCategory = ItemCategory.objects.all()
+    allItemCategory = Subcategory.objects.all()
     data = {'currentAdmin':u3,'totalAdmin':totalAdmin,'totalUser':totalUser,'totalItem':totalItems,'totalOffer':totalOffer,'allItemCategory':allItemCategory}
     return render(request,'addItemAdminPanel.html',data)
+
+# def addItemAdminPanellData(request):
+#     url = request.META.get('HTTP_REFERER')
+#     if request.method == "POST":
+#         itemName = request.POST.get('itemName')
+#         itemPrice = request.POST.get('itemPrice')
+#         catItem = request.POST.get('Catitem')
+#         print("catItem================== ",catItem)
+#         itemDesc = request.POST.get('itemDesc')
+#         allItemData = Item.objects.all()
+#         #getCategory = ItemCategory.objects.get(item_category_name=catItem)
+        
+#         uniqueString = str(uuid.uuid4())
+#         itemSlug = itemName + uniqueString
+
+#         itemData = Item()
+
+#         itemData.item_name = itemName
+#         itemData.item_price = itemPrice
+#         itemData.item_description = itemDesc
+#         for i in allItemData:
+#             if(i.slug == itemSlug):
+#                 uniqueString = str(uuid.uuid4())
+#                 break
+#         itemSlug = itemName + uniqueString
+#         itemData.slug = itemSlug
+#         itemData.item_category_iditem_category = Subcategory.objects.get(idsubcategory=catItem)
+#         itemData.offer_price = 0
+
+#         if(len(request.FILES) != 0):
+#             itemImage = request.FILES['itemImage']
+#             itemImage1 = str(itemImage)
+#             if(not(itemImage1.lower().endswith(('.png','.jpg','.jpeg')))):
+#                 messages.error(request,'Choose only image!')
+#                 return redirect(url)
+#             itemData.item_image = request.FILES['itemImage']
+            
+#         itemData.save()
+#         messages.success(request,'Item Added!')
+#         return redirect(url)
+    
+#     return render(request,'addItemAdminPanel.html')
+
 
 def addItemAdminPanellData(request):
     url = request.META.get('HTTP_REFERER')
@@ -2263,9 +2430,9 @@ def addItemAdminPanellData(request):
         itemName = request.POST.get('itemName')
         itemPrice = request.POST.get('itemPrice')
         catItem = request.POST.get('Catitem')
+        print("catItem================== ",catItem)
         itemDesc = request.POST.get('itemDesc')
         allItemData = Item.objects.all()
-        getCategory = ItemCategory.objects.get(item_category_name=catItem)
         
         uniqueString = str(uuid.uuid4())
         itemSlug = itemName + uniqueString
@@ -2281,7 +2448,10 @@ def addItemAdminPanellData(request):
                 break
         itemSlug = itemName + uniqueString
         itemData.slug = itemSlug
-        itemData.item_category_iditem_category = ItemCategory.objects.get(iditem_category=getCategory.iditem_category)
+        
+        # Fetch the Subcategory instance corresponding to the category name
+        subcategory_instance = Subcategory.objects.get(subcategory_name=catItem)
+        itemData.item_category_iditem_category = subcategory_instance
         itemData.offer_price = 0
 
         if(len(request.FILES) != 0):
