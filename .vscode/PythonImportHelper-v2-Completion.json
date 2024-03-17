@@ -424,6 +424,14 @@
         "documentation": {}
     },
     {
+        "label": "Path",
+        "importPath": "pathlib",
+        "description": "pathlib",
+        "isExtraImport": true,
+        "detail": "pathlib",
+        "documentation": {}
+    },
+    {
         "label": "constants",
         "importPath": "django.contrib.messages",
         "description": "django.contrib.messages",

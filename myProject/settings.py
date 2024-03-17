@@ -1,8 +1,9 @@
 import pymysql
 import socket
 import os
+from pathlib import  Path
 # socket.getaddrinfo('smtp.gmail.com',587)
-pymysql.install_as_MySQLdb()
+pymysql.install_as_MySQLdb() 
 """
 Django settings for myProject project.
 
